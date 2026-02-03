@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pedido #{{ pedido.id }} - FLEXS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/cart.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="orders-page">
+    <div class="orders-container">
+        <a href="{% url 'orders:lista' %}" class="btn btn-text" style="margin-bottom: 1rem;">← Volver a mis pedidos</a>
+
+        <div class="order-detail-card">
+            <div class="order-detail-header">
+                <div>
+                    <h1 class="order-detail-title">Pedido #{{ pedido.id }}</h1>
+                    <p style="color: var(--color-gray-600);">{{ pedido.created_at|date:"d/m/Y H:i" }}</p>
+                </div>
+                <span class="status-badge status-{{ pedido.estado }}" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                    {{ pedido.get_estado_display }}
+                </span>
+            </div>
+
+            <div class="order-detail-body">
+                <table class="order-items-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>SKU</th>
+                            <th style="text-align: right;">Precio Unit.</th>
+                            <th style="text-align: center;">Cant.</th>
+                            <th style="text-align: right;">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in pedido.items.all %}
+                        <tr>
+                            <td>{{ item.producto.nombre }}</td>
+                            <td>{{ item.producto.sku }}</td>
+                            <td style="text-align: right;">${{ item.precio_unitario|floatformat:2 }}</td>
+                            <td style="text-align: center;">{{ item.cantidad }}</td>
+                            <td style="text-align: right;">${{ item.subtotal|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="order-totals">
+                    {% if pedido.descuento_aplicado > 0 %}
+                    <p>Subtotal: ${{ pedido.subtotal|floatformat:2 }}</p>
+                    <p style="color: var(--color-success);">Descuento aplicado: {{ pedido.descuento_aplicado }}%</p>
+                    {% endif %}
+                    <p class="total">Total: ${{ pedido.total|floatformat:2 }}</p>
+                </div>
+
+                {% if pedido.nota %}
+                <div class="order-note">
+                    <h4>📝 Nota del pedido</h4>
+                    <p>{{ pedido.nota }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

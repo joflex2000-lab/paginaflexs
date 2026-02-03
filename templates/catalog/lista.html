@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Catálogo - FLEXS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="catalog-page">
+    <div class="container">
+        <div class="catalog-container">
+            <aside class="catalog-sidebar">
+                <h3 class="sidebar-title">Categorías</h3>
+                <div class="category-list">
+                    <a href="{% url 'catalog:lista' %}"
+                        class="category-item {% if not categoria_actual %}active{% endif %}">
+                        Todos los productos
+                    </a>
+                    {% for categoria in categorias %}
+                    <a href="{% url 'catalog:lista' %}?categoria={{ categoria.id }}"
+                        class="category-item {% if categoria_actual == categoria.id|stringformat:'s' %}active{% endif %}">
+                        {{ categoria.nombre }}
+                    </a>
+                    {% if categoria.subcategorias.all %}
+                    <div class="subcategory-list" style="margin-left: 1rem;">
+                        {% for sub in categoria.subcategorias.all %}
+                        <a href="{% url 'catalog:lista' %}?categoria={{ sub.id }}"
+                            class="category-item sub {% if categoria_actual == sub.id|stringformat:'s' %}active{% endif %}">
+                            {{ sub.nombre }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% empty %}
+                    <p style="color: var(--color-gray-500); font-size: 0.875rem;">No hay categorías</p>
+                    {% endfor %}
+                </div>
+
+                {% if filtros_dinamicos %}
+                <div class="filters-section">
+                    <h3 class="sidebar-title">Filtros</h3>
+                    <form id="filtersForm" method="get">
+                        {% if categoria_actual %}
+                        <input type="hidden" name="categoria" value="{{ categoria_actual }}">
+                        {% endif %}
+                        {% if busqueda %}
+                        <input type="hidden" name="q" value="{{ busqueda }}">
+                        {% endif %}
+
+                        {% for filtro in filtros_dinamicos %}
+                        <div class="filter-group">
+                            <div class="filter-title">{{ filtro.etiqueta }}</div>
+                            <div class="filter-options" id="filter-{{ filtro.nombre }}">
+                                {% if filtro.opciones|length > 10 %}
+                                <input type="text" class="filter-search" placeholder="Buscar..."
+                                    data-target="filter-{{ filtro.nombre }}">
+                                {% endif %}
+                                {% for opcion in filtro.opciones %}
+                                <label class="filter-option">
+                                    <input type="checkbox" name="attr_{{ filtro.nombre }}" value="{{ opcion }}" {% if
+                                        opcion in filtro.seleccionados %}checked{% endif %}
+                                        onchange="document.getElementById('filtersForm').submit()">
+                                    {{ opcion }}
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <a href="{% url 'catalog:lista' %}{% if categoria_actual %}?categoria={{ categoria_actual }}{% endif %}"
+                            class="btn btn-outline btn-sm" style="width: 100%; margin-top: 1rem;">
+                            🗑️ Limpiar filtros
+                        </a>
+                    </form>
+                </div>
+                {% endif %}
+            </aside>
+
+            <div class="catalog-main">
+                <div class="catalog-header">
+                    <form method="get" class="search-form">
+                        <input type="text" name="q" class="search-input" placeholder="Buscar productos..."
+                            value="{{ busqueda }}">
+                        {% if categoria_actual %}
+                        <input type="hidden" name="categoria" value="{{ categoria_actual }}">
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary">Buscar</button>
+                    </form>
+
+                    {% if descuento_cliente > 0 %}
+                    <div class="discount-badge">
+                        Tu descuento: <strong>{{ descuento_cliente }}%</strong>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if productos %}
+                <div class="products-catalog-grid">
+                    {% for producto in productos %}
+                    <div class="product-catalog-card">
+                        <div class="product-image">
+                            {% if producto.imagen %}
+                            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+                            {% else %}
+                            📦
+                            {% endif %}
+                        </div>
+                        <div class="product-info">
+                            <span class="product-sku">{{ producto.sku }}</span>
+                            <h3 class="product-name">{{ producto.nombre }}</h3>
+
+                            <div class="product-price">
+                                {% if descuento_cliente > 0 %}
+                                ${{ producto.precio_con_descuento|floatformat:2 }}
+                                <span class="product-price-original">${{ producto.precio }}</span>
+                                <span class="product-discount-badge">-{{ descuento_cliente }}%</span>
+                                {% else %}
+                                ${{ producto.precio }}
+                                {% endif %}
+                            </div>
+
+                            <div
+                                class="product-stock {% if producto.stock > 10 %}stock-available{% elif producto.stock > 0 %}stock-low{% else %}stock-out{% endif %}">
+                                {% if producto.stock > 10 %}
+                                ✓ En stock
+                                {% elif producto.stock > 0 %}
+                                ⚠ Pocas unidades ({{ producto.stock }})
+                                {% else %}
+                                ✗ Sin stock
+                                {% endif %}
+                            </div>
+
+                            <div class="product-actions">
+                                <form action="{% url 'cart:agregar' producto.id %}" method="post"
+                                    class="add-to-cart-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="cantidad" value="1">
+                                    <button type="submit" class="btn btn-primary btn-sm">🛒 Agregar</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if page_obj.has_other_pages %}
+                <div class="pagination">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}">‹ Anterior</a>
+                    {% endif %}
+                    <span class="current">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">Siguiente ›</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% else %}
+                <div class="no-results">
+                    <h3>No se encontraron productos</h3>
+                    <p>Intenta con otros términos de búsqueda o revisa los filtros.</p>
+                    <a href="{% url 'catalog:lista' %}" class="btn btn-primary">Ver todos los productos</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

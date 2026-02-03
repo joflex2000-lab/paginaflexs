@@ -1,0 +1,67 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+    <h1 class="panel-title">Dashboard</h1>
+</div>
+
+<div class="dashboard-stats">
+    <div class="stat-card primary">
+        <div class="stat-value">{{ pedidos_pendientes }}</div>
+        <div class="stat-label">Pedidos Pendientes</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ total_pedidos }}</div>
+        <div class="stat-label">Total Pedidos</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ total_productos }}</div>
+        <div class="stat-label">Productos Activos</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ total_clientes }}</div>
+        <div class="stat-label">Clientes</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Últimos Pedidos</h3>
+    </div>
+    <div class="panel-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Cliente</th>
+                    <th>Estado</th>
+                    <th>Total</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pedido in ultimos_pedidos %}
+                <tr>
+                    <td>{{ pedido.id }}</td>
+                    <td>{{ pedido.cliente.nombre }}</td>
+                    <td><span class="status-badge status-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span>
+                    </td>
+                    <td>${{ pedido.total|floatformat:2 }}</td>
+                    <td>{{ pedido.created_at|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <a href="{% url 'panel:pedido_detalle' pedido.id %}" class="btn btn-sm btn-outline">Ver</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--color-gray-500);">No hay pedidos aún</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}FLEXS - Repuestos de Elásticos para Camiones y Acoplados{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-bg"></div>
+    <div class="container hero-content">
+        <div class="hero-text">
+            <h1 class="hero-title">
+                Descubra la gama de productos <span class="highlight">FLEXS</span>
+            </h1>
+            <h2 class="hero-subtitle">Optimice el rendimiento de sus vehículos</h2>
+            <p class="hero-description">
+                Expertos en Repuestos para Industrias de Transporte
+            </p>
+            <div class="hero-buttons">
+                <a href="{% url 'catalog:lista' %}" class="btn btn-primary btn-lg">Ver Catálogo</a>
+                <a href="{% url 'accounts:registro' %}" class="btn btn-outline btn-lg">Crear Cuenta</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Nosotros Section -->
+<section id="nosotros" class="section section-about">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">01</span>
+            <h2 class="section-title">Nosotros</h2>
+        </div>
+
+        <div class="about-grid">
+            <div class="about-content">
+                <h3>Ayudando a Empresas a Mantenerse en Movimiento</h3>
+                <p>
+                    En <strong>Flexs</strong>, nos dedicamos a ofrecer repuestos de elástico de alta calidad
+                    para camiones y acoplados. Nuestro amplio catálogo y nuestro compromiso con el servicio
+                    al cliente nos convierten en la opción ideal para talleres, empresas con flotas de
+                    vehículos y distribuidoras.
+                </p>
+                <p>
+                    Nuestro equipo dedicado está siempre disponible para ayudarte a encontrar las piezas
+                    adecuadas y garantizar una experiencia de compra sin problemas, desde el pedido hasta
+                    la entrega.
+                </p>
+                <div class="about-cta">
+                    <p><strong>Estamos esperando su mensaje para conocerlo y brindarle una lista de precios a su
+                            medida.</strong></p>
+                    <a href="#contacto" class="btn btn-primary">Contactar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Servicios Section -->
+<section id="servicios" class="section section-services">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">02</span>
+            <h2 class="section-title">¿Cómo podemos ayudarlo?</h2>
+        </div>
+
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-icon">📦</div>
+                <h3>Amplio Catálogo, Amplio Stock</h3>
+                <p>Miles de productos disponibles para entrega inmediata. Todo lo que necesita para su flota en un solo
+                    lugar.</p>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">🔧</div>
+                <h3>Fabricación Propia</h3>
+                <p>Abrazaderas U-bolt de fabricación propia. Calidad garantizada y precios competitivos.</p>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">🚚</div>
+                <h3>Entregas Rápidas y Atención Personalizada</h3>
+                <p>Enviamos a todo el país. Nuestro equipo lo asesora para encontrar exactamente lo que necesita.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Productos Section -->
+<section id="productos" class="section section-products">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">03</span>
+            <h2 class="section-title">Nuestros Productos</h2>
+        </div>
+
+        <div class="products-grid">
+            <div class="product-card">
+                <div class="product-icon">🔩</div>
+                <h3>Elásticos</h3>
+            </div>
+
+            <div class="product-card">
+                <div class="product-icon">⚙️</div>
+                <h3>Bujes</h3>
+            </div>
+
+            <div class="product-card">
+                <div class="product-icon">🔨</div>
+                <h3>Fundición</h3>
+            </div>
+
+            <div class="product-card">
+                <div class="product-icon">🔗</div>
+                <h3>Pernos</h3>
+            </div>
+
+            <div class="product-card">
+                <div class="product-icon">🔧</div>
+                <h3>Bulonería</h3>
+            </div>
+
+            <div class="product-card">
+                <div class="product-icon">⛓️</div>
+                <h3>Abrazaderas</h3>
+            </div>
+
+            <div class="product-card">
+                <div class="product-icon">💨</div>
+                <h3>Suspensión Neumática</h3>
+            </div>
+
+            <div class="product-card">
+                <div class="product-icon">📏</div>
+                <h3>Insertos de Elástico</h3>
+            </div>
+
+            <div class="product-card">
+                <div class="product-icon">⚖️</div>
+                <h3>Balancines</h3>
+            </div>
+        </div>
+
+        <div class="products-cta">
+            <a href="{% url 'catalog:lista' %}" class="btn btn-primary btn-lg">Ver Catálogo Completo</a>
+        </div>
+    </div>
+</section>
+
+<!-- Contacto Section -->
+<section id="contacto" class="section section-contact">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">04</span>
+            <h2 class="section-title">Contacto</h2>
+        </div>
+
+        <div class="contact-grid">
+            <div class="contact-info">
+                <div class="contact-item">
+                    <span class="contact-icon">📍</span>
+                    <div>
+                        <h4>Dirección</h4>
+                        <p>Indalecio Gomez 4215, Villa Lynch,<br>San Martín, Buenos Aires, Argentina</p>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <span class="contact-icon">📞</span>
+                    <div>
+                        <h4>Teléfonos</h4>
+                        <p>+54 011 5177-9690</p>
+                        <p>+54 011 4755-2404</p>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <span class="contact-icon">✉️</span>
+                    <div>
+                        <h4>Email</h4>
+                        <p><a href="mailto:ventas@flexs.com.ar">ventas@flexs.com.ar</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-cta">
+                <h3>¿Listo para hacer su pedido?</h3>
+                <p>Cree una cuenta para acceder a nuestro catálogo con precios y realizar pedidos online.</p>
+                <div class="contact-buttons">
+                    <a href="{% url 'accounts:registro' %}" class="btn btn-primary">Crear Cuenta</a>
+                    <a href="{% url 'accounts:login' %}" class="btn btn-outline">Iniciar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

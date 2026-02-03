@@ -1,0 +1,126 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block title %}Pedido #{{ pedido.id }}{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+    <h1 class="panel-title">Pedido #{{ pedido.id }}</h1>
+    <a href="{% url 'panel:pedidos' %}" class="btn btn-outline">← Volver</a>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+    <!-- Detalle del pedido -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Items del Pedido</h3>
+        </div>
+        <div class="panel-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>SKU</th>
+                        <th style="text-align: right;">Precio</th>
+                        <th style="text-align: center;">Cant.</th>
+                        <th style="text-align: right;">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in pedido.items.all %}
+                    <tr>
+                        <td>{{ item.producto.nombre }}</td>
+                        <td>{{ item.producto.sku }}</td>
+                        <td style="text-align: right;">${{ item.precio_unitario|floatformat:2 }}</td>
+                        <td style="text-align: center;">{{ item.cantidad }}</td>
+                        <td style="text-align: right;">${{ item.subtotal|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" style="text-align: right; font-weight: 600;">Total:</td>
+                        <td style="text-align: right; font-weight: 700; font-size: 1.25rem;">${{ pedido.total|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        {% if pedido.nota %}
+        <div class="card-body" style="border-top: 1px solid var(--color-gray-200);">
+            <h4 style="font-size: 0.875rem; color: var(--color-gray-600); margin-bottom: 0.5rem;">📝 Nota del cliente:
+            </h4>
+            <p>{{ pedido.nota }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Info lateral -->
+    <div>
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+                <h3>Cliente</h3>
+            </div>
+            <div class="card-body">
+                <p><strong>{{ pedido.cliente.nombre }}</strong></p>
+                {% if pedido.cliente.cuit_dni %}
+                <p>CUIT/DNI: {{ pedido.cliente.cuit_dni }}</p>
+                {% endif %}
+                {% if pedido.cliente.telefonos %}
+                <p>📞 {{ pedido.cliente.telefonos }}</p>
+                {% endif %}
+                {% if pedido.cliente.usuario.email %}
+                <p>✉️ {{ pedido.cliente.usuario.email }}</p>
+                {% endif %}
+                {% if pedido.cliente.domicilio %}
+                <p>📍 {{ pedido.cliente.domicilio }}</p>
+                {% endif %}
+                {% if pedido.descuento_aplicado > 0 %}
+                <p style="color: var(--color-success); font-weight: 600;">Descuento: {{ pedido.descuento_aplicado }}%
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Estado</h3>
+            </div>
+            <div class="card-body">
+                <p style="margin-bottom: 1rem;">
+                    <span class="status-badge status-{{ pedido.estado }}"
+                        style="font-size: 1rem; padding: 0.5rem 1rem;">
+                        {{ pedido.get_estado_display }}
+                    </span>
+                </p>
+
+                <form action="{% url 'panel:pedido_cambiar_estado' pedido.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="estado">Cambiar estado:</label>
+                        <select name="estado" id="estado" class="form-control">
+                            <option value="pendiente" {% if pedido.estado == 'pendiente' %}selected{% endif %}>Pendiente
+                            </option>
+                            <option value="confirmado" {% if pedido.estado == 'confirmado' %}selected{% endif %}>
+                                Confirmado</option>
+                            <option value="en_proceso" {% if pedido.estado == 'en_proceso' %}selected{% endif %}>En
+                                Proceso</option>
+                            <option value="enviado" {% if pedido.estado == 'enviado' %}selected{% endif %}>Enviado
+                            </option>
+                            <option value="entregado" {% if pedido.estado == 'entregado' %}selected{% endif %}>Entregado
+                            </option>
+                            <option value="cancelado" {% if pedido.estado == 'cancelado' %}selected{% endif %}>Cancelado
+                            </option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Actualizar Estado</button>
+                </form>
+
+                <p style="margin-top: 1.5rem; font-size: 0.875rem; color: var(--color-gray-500);">
+                    Creado: {{ pedido.created_at|date:"d/m/Y H:i" }}<br>
+                    Actualizado: {{ pedido.updated_at|date:"d/m/Y H:i" }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

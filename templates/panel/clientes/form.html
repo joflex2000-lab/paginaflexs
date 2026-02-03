@@ -1,0 +1,129 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block title %}{% if object %}Editar{% else %}Nuevo{% endif %} Cliente{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+    <h1 class="panel-title">{% if object %}Editar Cliente{% else %}Nuevo Cliente{% endif %}</h1>
+</div>
+
+<div class="panel-form">
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Credenciales de Acceso -->
+        <h3
+            style="margin: 0 0 1rem 0; font-size: 1rem; color: var(--color-gray-600); border-bottom: 1px solid var(--color-gray-300); padding-bottom: 0.5rem;">
+            🔐 Credenciales de Acceso
+        </h3>
+
+        {% if object %}
+        <!-- Modo Editar: Mostrar username actual -->
+        <div class="form-group" style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+            <label style="font-weight: 600; margin-bottom: 0.25rem;">Usuario:</label>
+            <p style="margin: 0; font-family: monospace; color: var(--color-primary);">{{ object.usuario.username }}</p>
+            <a href="{% url 'panel:cliente_cambiar_password' object.id %}" class="btn btn-sm btn-outline"
+                style="margin-top: 0.5rem;">
+                🔄 Cambiar Contraseña
+            </a>
+        </div>
+        {% else %}
+        <!-- Modo Crear: Permitir elegir username y password -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="id_username">Usuario * <small>(para login)</small></label>
+                <input type="text" name="username" id="id_username" class="form-control" placeholder="ej: empresa_sa"
+                    required>
+                <p class="form-text">El cliente usará este usuario para loguearse</p>
+            </div>
+
+            <div class="form-group">
+                <label for="id_password">Contraseña *</label>
+                <input type="text" name="password" id="id_password" class="form-control" value="changeme123" required>
+                <p class="form-text">Contraseña inicial (el cliente puede cambiarla)</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Datos del Cliente -->
+        <h3
+            style="margin: 1.5rem 0 1rem 0; font-size: 1rem; color: var(--color-gray-600); border-bottom: 1px solid var(--color-gray-300); padding-bottom: 0.5rem;">
+            📋 Datos del Cliente
+        </h3>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="id_nombre">Nombre / Razón Social *</label>
+                <input type="text" name="nombre" id="id_nombre" class="form-control"
+                    value="{{ form.nombre.value|default:'' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_contacto">Contacto</label>
+                <input type="text" name="contacto" id="id_contacto" class="form-control"
+                    value="{{ form.contacto.value|default:'' }}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="id_tipo_cliente">Tipo de Cliente</label>
+                <input type="text" name="tipo_cliente" id="id_tipo_cliente" class="form-control"
+                    value="{{ form.tipo_cliente.value|default:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="id_cuit_dni">CUIT/DNI</label>
+                <input type="text" name="cuit_dni" id="id_cuit_dni" class="form-control"
+                    value="{{ form.cuit_dni.value|default:'' }}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="id_provincia">Provincia</label>
+                <input type="text" name="provincia" id="id_provincia" class="form-control"
+                    value="{{ form.provincia.value|default:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="id_telefonos">Teléfonos</label>
+                <input type="text" name="telefonos" id="id_telefonos" class="form-control"
+                    value="{{ form.telefonos.value|default:'' }}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="id_domicilio">Domicilio</label>
+            <input type="text" name="domicilio" id="id_domicilio" class="form-control"
+                value="{{ form.domicilio.value|default:'' }}">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="id_descuento">Descuento (%)</label>
+                <input type="number" name="descuento" id="id_descuento" class="form-control" step="0.01" min="0"
+                    max="100" value="{{ form.descuento.value|default:'0' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="id_condicion_iva">Condición IVA</label>
+                <select name="condicion_iva" id="id_condicion_iva" class="form-control">
+                    <option value="CF" {% if form.condicion_iva.value == 'CF' %}selected{% endif %}>Consumidor Final
+                    </option>
+                    <option value="RI" {% if form.condicion_iva.value == 'RI' %}selected{% endif %}>Responsable Inscripto
+                    </option>
+                    <option value="MO" {% if form.condicion_iva.value == 'MO' %}selected{% endif %}>Monotributista
+                    </option>
+                    <option value="EX" {% if form.condicion_iva.value == 'EX' %}selected{% endif %}>Exento</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a href="{% url 'panel:clientes' %}" class="btn btn-outline">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

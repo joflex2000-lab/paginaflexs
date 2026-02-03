@@ -1,0 +1,134 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Panel Admin{% endblock %} - FLEXS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/panel.css' %}">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-content">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <button class="sidebar-toggle"
+                    style="display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer;">☰</button>
+                <a href="{% url 'core:home' %}" class="logo">
+                    <span class="logo-text">FLEXS</span>
+                </a>
+                <span style="color: var(--color-gray-500); font-size: 0.875rem;">Panel Admin</span>
+            </div>
+
+            <div class="header-actions">
+                <a href="{% url 'catalog:lista' %}" class="btn btn-outline btn-sm">Ver Tienda</a>
+                <span style="color: var(--color-gray-600);">{{ user.username }}</span>
+                <form action="{% url 'accounts:logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-text">Salir</button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="message message-{{ message.tags }}">
+            {{ message }}
+            <button class="message-close">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="panel-layout">
+        <!-- Sidebar -->
+        <aside class="panel-sidebar">
+            <nav class="panel-nav">
+                <div class="panel-nav-section">
+                    <div class="panel-nav-title">General</div>
+                    <ul class="panel-nav-list">
+                        <li>
+                            <a href="{% url 'panel:dashboard' %}"
+                                class="panel-nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                                <span class="panel-nav-icon">📊</span>
+                                Dashboard
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="panel-nav-section">
+                    <div class="panel-nav-title">Catálogo</div>
+                    <ul class="panel-nav-list">
+                        <li>
+                            <a href="{% url 'panel:productos' %}"
+                                class="panel-nav-item {% if 'producto' in request.resolver_match.url_name %}active{% endif %}">
+                                <span class="panel-nav-icon">📦</span>
+                                Productos
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'panel:categorias' %}"
+                                class="panel-nav-item {% if 'categoria' in request.resolver_match.url_name %}active{% endif %}">
+                                <span class="panel-nav-icon">📁</span>
+                                Categorías
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="panel-nav-section">
+                    <div class="panel-nav-title">Ventas</div>
+                    <ul class="panel-nav-list">
+                        <li>
+                            <a href="{% url 'panel:pedidos' %}"
+                                class="panel-nav-item {% if 'pedido' in request.resolver_match.url_name %}active{% endif %}">
+                                <span class="panel-nav-icon">📋</span>
+                                Pedidos
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'panel:clientes' %}"
+                                class="panel-nav-item {% if 'cliente' in request.resolver_match.url_name %}active{% endif %}">
+                                <span class="panel-nav-icon">👥</span>
+                                Clientes
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="panel-nav-section">
+                    <div class="panel-nav-title">Herramientas</div>
+                    <ul class="panel-nav-list">
+                        <li>
+                            <a href="{% url 'imports:select' %}"
+                                class="panel-nav-item {% if 'import' in request.path %}active{% endif %}">
+                                <span class="panel-nav-icon">📥</span>
+                                Importar
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="panel-content">
+            {% block panel_content %}{% endblock %}
+        </main>
+    </div>
+
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+
+</html>

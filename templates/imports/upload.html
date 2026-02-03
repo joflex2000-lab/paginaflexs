@@ -1,0 +1,171 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block title %}Subir {{ info.nombre }}{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+    <a href="{% url 'imports:select' %}" class="btn btn-outline btn-sm">← Volver</a>
+    <h1 class="panel-title">{{ info.icono }} Importar {{ info.nombre }}</h1>
+</div>
+
+<div class="upload-container">
+    <form method="post" enctype="multipart/form-data" class="upload-form" id="uploadForm">
+        {% csrf_token %}
+
+        <div class="upload-zone" id="dropZone">
+            <div class="upload-icon">📁</div>
+            <p class="upload-text">Arrastrá tu archivo aquí o hacé click para seleccionar</p>
+            <p class="upload-hint">Formatos soportados: .xlsx, .csv</p>
+            <input type="file" name="archivo" id="fileInput" accept=".xlsx,.csv" required style="display: none;">
+        </div>
+
+        <div class="file-selected" id="fileSelected" style="display: none;">
+            <span class="file-name" id="fileName"></span>
+            <button type="button" class="btn btn-text" id="clearFile">✕</button>
+        </div>
+
+        <div class="upload-info">
+            <h4>Columnas esperadas:</h4>
+            <p>{{ info.descripcion }}</p>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" disabled>
+            Analizar archivo →
+        </button>
+    </form>
+</div>
+
+<style>
+    .upload-container {
+        max-width: 600px;
+        margin: 2rem auto;
+    }
+
+    .upload-form {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .upload-zone {
+        border: 2px dashed var(--color-gray-300);
+        border-radius: 12px;
+        padding: 3rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.dragover {
+        border-color: var(--color-primary);
+        background: var(--color-primary-light);
+    }
+
+    .upload-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+
+    .upload-text {
+        font-size: 1.125rem;
+        color: var(--color-gray-700);
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-hint {
+        font-size: 0.875rem;
+        color: var(--color-gray-500);
+    }
+
+    .file-selected {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--color-success-light);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+
+    .file-name {
+        font-weight: 500;
+        color: var(--color-success);
+    }
+
+    .upload-info {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: var(--color-gray-50);
+        border-radius: 8px;
+    }
+
+    .upload-info h4 {
+        margin-bottom: 0.5rem;
+        color: var(--color-gray-700);
+    }
+
+    .upload-info p {
+        font-size: 0.875rem;
+        color: var(--color-gray-600);
+    }
+
+    #submitBtn {
+        width: 100%;
+        margin-top: 1.5rem;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileSelected = document.getElementById('fileSelected');
+        const fileName = document.getElementById('fileName');
+        const clearFile = document.getElementById('clearFile');
+        const submitBtn = document.getElementById('submitBtn');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length) {
+                fileInput.files = files;
+                showFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) {
+                showFile(fileInput.files[0]);
+            }
+        });
+
+        clearFile.addEventListener('click', () => {
+            fileInput.value = '';
+            fileSelected.style.display = 'none';
+            dropZone.style.display = 'block';
+            submitBtn.disabled = true;
+        });
+
+        function showFile(file) {
+            fileName.textContent = '📄 ' + file.name;
+            fileSelected.style.display = 'flex';
+            dropZone.style.display = 'none';
+            submitBtn.disabled = false;
+        }
+    });
+</script>
+{% endblock %}

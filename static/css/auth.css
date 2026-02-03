@@ -1,0 +1,192 @@
+/* ========================================
+   AUTH STYLES (Login, Register, Profile)
+   ======================================== */
+
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-8);
+    background: linear-gradient(135deg, var(--color-gray-100) 0%, var(--color-gray-200) 100%);
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 440px;
+}
+
+.auth-card {
+    background: var(--color-white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+}
+
+.auth-header {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    padding: var(--spacing-8);
+    text-align: center;
+}
+
+.auth-logo {
+    font-size: var(--font-size-3xl);
+    font-weight: 800;
+    color: var(--color-white);
+    margin-bottom: var(--spacing-2);
+}
+
+.auth-title {
+    font-size: var(--font-size-xl);
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.auth-body {
+    padding: var(--spacing-8);
+}
+
+.auth-form .form-group {
+    margin-bottom: var(--spacing-5);
+}
+
+.auth-form .btn {
+    width: 100%;
+    padding: var(--spacing-4);
+    font-size: var(--font-size-base);
+}
+
+.auth-footer {
+    text-align: center;
+    padding: var(--spacing-6);
+    background: var(--color-gray-50);
+    border-top: 1px solid var(--color-gray-200);
+}
+
+.auth-footer p {
+    color: var(--color-gray-600);
+}
+
+.auth-footer a {
+    font-weight: 600;
+}
+
+/* Errors */
+.auth-errors {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: var(--radius-md);
+    padding: var(--spacing-4);
+    margin-bottom: var(--spacing-4);
+}
+
+.auth-errors ul {
+    margin: 0;
+    padding-left: var(--spacing-4);
+}
+
+.auth-errors li {
+    color: #991b1b;
+    font-size: var(--font-size-sm);
+    list-style: disc;
+}
+
+/* Profile Page */
+.profile-page {
+    padding-top: 90px;
+    min-height: 100vh;
+    background: var(--color-gray-100);
+}
+
+.profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--spacing-8);
+}
+
+.profile-card {
+    background: var(--color-white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
+.profile-header {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    padding: var(--spacing-8);
+    color: var(--color-white);
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-3xl);
+    margin-bottom: var(--spacing-4);
+}
+
+.profile-name {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+}
+
+.profile-role {
+    font-size: var(--font-size-base);
+    opacity: 0.9;
+}
+
+.profile-body {
+    padding: var(--spacing-8);
+}
+
+.profile-section {
+    margin-bottom: var(--spacing-8);
+}
+
+.profile-section:last-child {
+    margin-bottom: 0;
+}
+
+.profile-section h3 {
+    font-size: var(--font-size-lg);
+    color: var(--color-dark);
+    margin-bottom: var(--spacing-4);
+    padding-bottom: var(--spacing-2);
+    border-bottom: 2px solid var(--color-primary);
+}
+
+.profile-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--spacing-4);
+}
+
+.profile-info-item {
+    padding: var(--spacing-3);
+    background: var(--color-gray-50);
+    border-radius: var(--radius-md);
+}
+
+.profile-info-label {
+    font-size: var(--font-size-xs);
+    color: var(--color-gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-1);
+}
+
+.profile-info-value {
+    font-size: var(--font-size-base);
+    color: var(--color-dark);
+    font-weight: 500;
+}
+
+.profile-actions {
+    display: flex;
+    gap: var(--spacing-4);
+    flex-wrap: wrap;
+}

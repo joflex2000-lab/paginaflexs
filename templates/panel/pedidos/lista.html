@@ -1,0 +1,76 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block title %}Pedidos{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+    <h1 class="panel-title">Pedidos</h1>
+</div>
+
+<div class="filter-bar">
+    <form method="get" style="display: flex; gap: 1rem; flex-wrap: wrap; width: 100%;">
+        <input type="text" name="q" class="form-control" placeholder="Buscar por cliente o # pedido..."
+            value="{{ request.GET.q }}">
+        <select name="estado" class="form-control">
+            <option value="">Todos los estados</option>
+            {% for value, label in estados %}
+            <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        {% if request.GET.q or request.GET.estado %}
+        <a href="{% url 'panel:pedidos' %}" class="btn btn-outline">Limpiar</a>
+        {% endif %}
+    </form>
+</div>
+
+<div class="panel-table">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Cliente</th>
+                <th>Estado</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pedido in pedidos %}
+            <tr>
+                <td><strong>#{{ pedido.id }}</strong></td>
+                <td>{{ pedido.cliente.nombre }}</td>
+                <td><span class="status-badge status-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span></td>
+                <td>{{ pedido.cantidad_items }}</td>
+                <td>${{ pedido.total|floatformat:2 }}</td>
+                <td>{{ pedido.created_at|date:"d/m/Y H:i" }}</td>
+                <td class="actions-cell">
+                    <a href="{% url 'panel:pedido_detalle' pedido.id %}" class="btn-icon btn-icon-view"
+                        title="Ver">👁️</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; color: var(--color-gray-500); padding: 2rem;">
+                    No se encontraron pedidos
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if page_obj.has_other_pages %}
+<div class="pagination" style="margin-top: 1rem;">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}">‹ Anterior</a>
+    {% endif %}
+    <span class="current">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}">Siguiente ›</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

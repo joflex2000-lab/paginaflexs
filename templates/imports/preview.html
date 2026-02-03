@@ -1,0 +1,403 @@
+{% extends 'panel/base_panel.html' %}
+{% load import_filters %}
+
+{% block title %}Preview - Importar {{ info.nombre }}{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+    <a href="{% url 'imports:upload' tipo %}" class="btn btn-outline btn-sm">← Volver</a>
+    <h1 class="panel-title">{{ info.icono }} Preview: {{ info.nombre }}</h1>
+</div>
+
+<div class="preview-container">
+    <div class="preview-summary">
+        <div class="summary-item summary-create">
+            <span class="summary-number">{{ preview.a_crear }}</span>
+            <span class="summary-label">A crear</span>
+        </div>
+        <div class="summary-item summary-update">
+            <span class="summary-number">{{ preview.a_actualizar }}</span>
+            <span class="summary-label">A actualizar</span>
+        </div>
+        <div class="summary-item summary-error">
+            <span class="summary-number">{{ preview.errores|length }}</span>
+            <span class="summary-label">Errores</span>
+        </div>
+        <div class="summary-item summary-total">
+            <span class="summary-number">{{ preview.total }}</span>
+            <span class="summary-label">Total filas</span>
+        </div>
+    </div>
+
+    <div class="preview-file">
+        <strong>Archivo:</strong> {{ filename }}
+    </div>
+
+    {% if preview.errores %}
+    <div class="preview-errors">
+        <h3>⚠️ Errores encontrados ({{ preview.errores|length }})</h3>
+        <div class="errors-list">
+            {% for error in preview.errores %}
+            <div class="error-item">
+                <span class="error-row">Fila {{ error.fila }}</span>
+                <span class="error-msg">{{ error.mensaje }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        <p class="errors-note">Las filas con errores serán ignoradas durante la importación.</p>
+    </div>
+    {% endif %}
+
+    <div class="preview-table-container">
+        <h3>📋 Vista previa (primeras 10 filas)</h3>
+        <div class="table-scroll">
+            <table class="preview-table">
+                <thead>
+                    <tr>
+                        {% for col in columnas %}
+                        {% if col != '_fila' %}
+                        <th>{{ col }}</th>
+                        {% endif %}
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fila in preview.filas %}
+                    <tr>
+                        {% for col in columnas %}
+                        {% if col != '_fila' %}
+                        <td>{{ fila|get_item:col }}</td>
+                        {% endif %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <form method="post" action="{% url 'imports:execute' tipo %}" id="importForm" class="import-actions">
+        {% csrf_token %}
+
+        {% if tipo == 'clientes' %}
+        <div class="form-check">
+            <label>
+                <input type="checkbox" name="actualizar_passwords">
+                Actualizar contraseñas de usuarios existentes
+            </label>
+        </div>
+        {% endif %}
+
+        <div class="actions-buttons">
+            <a href="{% url 'imports:upload' tipo %}" class="btn btn-outline">Cancelar</a>
+            <button type="submit" class="btn btn-primary btn-lg" id="importBtn">
+                ✓ Confirmar Importación
+            </button>
+        </div>
+    </form>
+
+    <div id="progressContainer" style="display: none;">
+        <div class="progress-wrapper">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Procesando...</div>
+        </div>
+    </div>
+
+    <div id="resultContainer" style="display: none;">
+        <div class="result-box">
+            <h3>✅ Importación completada</h3>
+            <div class="result-stats">
+                <span class="stat stat-create"><strong id="resultCreados">0</strong> creados</span>
+                <span class="stat stat-update"><strong id="resultActualizados">0</strong> actualizados</span>
+                <span class="stat stat-error"><strong id="resultErrores">0</strong> errores</span>
+            </div>
+            <div class="result-actions">
+                <a href="{% url 'imports:select' %}" class="btn btn-primary">Nueva importación</a>
+                <a href="#" id="downloadErrorsBtn" class="btn btn-outline" style="display: none;">Descargar errores</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .preview-container {
+        max-width: 1000px;
+    }
+
+    .preview-summary {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .summary-item {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .summary-number {
+        font-size: 2rem;
+        font-weight: 700;
+        display: block;
+    }
+
+    .summary-label {
+        font-size: 0.875rem;
+        color: var(--color-gray-600);
+    }
+
+    .summary-create .summary-number {
+        color: var(--color-success);
+    }
+
+    .summary-update .summary-number {
+        color: var(--color-primary);
+    }
+
+    .summary-error .summary-number {
+        color: var(--color-danger);
+    }
+
+    .summary-total .summary-number {
+        color: var(--color-gray-700);
+    }
+
+    .preview-file {
+        background: var(--color-gray-50);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .preview-errors {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+    }
+
+    .preview-errors h3 {
+        margin-bottom: 1rem;
+    }
+
+    .errors-list {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .error-item {
+        display: flex;
+        gap: 1rem;
+        padding: 0.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .error-row {
+        font-weight: 600;
+        color: #856404;
+        min-width: 80px;
+    }
+
+    .errors-note {
+        margin-top: 1rem;
+        font-size: 0.875rem;
+        color: #856404;
+    }
+
+    .preview-table-container {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .table-scroll {
+        overflow-x: auto;
+    }
+
+    .preview-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+    }
+
+    .preview-table th,
+    .preview-table td {
+        padding: 0.75rem;
+        border: 1px solid var(--color-gray-200);
+        text-align: left;
+    }
+
+    .preview-table th {
+        background: var(--color-gray-100);
+        font-weight: 600;
+    }
+
+    .import-actions {
+        margin-top: 1.5rem;
+    }
+
+    .form-check {
+        margin-bottom: 1rem;
+    }
+
+    .actions-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+    }
+
+    .progress-wrapper {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .progress-bar {
+        height: 24px;
+        background: var(--color-gray-200);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: var(--color-primary);
+        width: 0%;
+        transition: width 0.3s;
+    }
+
+    .progress-text {
+        margin-top: 1rem;
+        color: var(--color-gray-600);
+    }
+
+    .result-box {
+        background: #d4edda;
+        border: 1px solid #28a745;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .result-stats {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin: 1.5rem 0;
+    }
+
+    .stat {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        background: white;
+    }
+
+    .stat-create {
+        color: var(--color-success);
+    }
+
+    .stat-update {
+        color: var(--color-primary);
+    }
+
+    .stat-error {
+        color: var(--color-danger);
+    }
+
+    .result-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 1rem;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('importForm');
+        const importBtn = document.getElementById('importBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const resultContainer = document.getElementById('resultContainer');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Ocultar form, mostrar progress
+            form.style.display = 'none';
+            progressContainer.style.display = 'block';
+
+            // Iniciar polling de progreso
+            let progressInterval = setInterval(checkProgress, 1000);
+
+            function checkProgress() {
+                fetch('{% url "imports:active_status" %}')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.active && data.total > 0) {
+                            const percent = Math.round((data.progreso / data.total) * 100);
+                            progressFill.style.width = percent + '%';
+                            progressText.textContent = `Procesando... ${percent}% (${data.progreso} de ${data.total})`;
+                        }
+                    })
+                    .catch(e => console.log('Polling error', e));
+            }
+
+            // Enviar request real
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    clearInterval(progressInterval);
+                    progressFill.style.width = '100%';
+                    progressText.textContent = 'Completado!';
+
+                    if (data.success) {
+                        // Mostrar resultado
+                        setTimeout(() => {
+                            progressContainer.style.display = 'none';
+                            resultContainer.style.display = 'block';
+
+                            document.getElementById('resultCreados').textContent = data.creados;
+                            document.getElementById('resultActualizados').textContent = data.actualizados;
+                            document.getElementById('resultErrores').textContent = data.errores;
+
+                            if (data.errores > 0) {
+                                const downloadBtn = document.getElementById('downloadErrorsBtn');
+                                downloadBtn.style.display = 'inline-block';
+                                downloadBtn.href = '{% url "imports:download_errors" 0 %}'.replace('0', data.log_id);
+                            }
+                        }, 500);
+                    } else {
+                        alert('Error: ' + data.error);
+                        form.style.display = 'block';
+                        progressContainer.style.display = 'none';
+                    }
+                })
+                .catch(err => {
+                    clearInterval(progressInterval);
+                    console.error(err);
+                    alert('Error de conexión');
+                    form.style.display = 'block';
+                    progressContainer.style.display = 'none';
+                });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block title %}Eliminar Producto{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+    <h1 class="panel-title">Eliminar Producto</h1>
+</div>
+
+<div class="card" style="max-width: 500px;">
+    <div class="card-body" style="text-align: center;">
+        <h3 style="color: var(--color-error); margin-bottom: 1rem;">⚠️ ¿Estás seguro?</h3>
+        <p style="margin-bottom: 1.5rem;">
+            Vas a eliminar el producto:<br>
+            <strong>{{ object.sku }} - {{ object.nombre }}</strong>
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button type="submit" class="btn btn-primary"
+                    style="background: var(--color-error); border-color: var(--color-error);">Sí, eliminar</button>
+                <a href="{% url 'panel:productos' %}" class="btn btn-outline">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

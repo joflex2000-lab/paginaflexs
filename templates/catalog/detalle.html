@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ producto.nombre }} - FLEXS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="catalog-page">
+    <div class="container" style="padding: 2rem 1rem;">
+        <a href="{% url 'catalog:lista' %}" class="btn btn-text" style="margin-bottom: 1rem;">← Volver al catálogo</a>
+
+        <div class="card" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+            <div class="product-detail-image"
+                style="aspect-ratio: 1; background: var(--color-gray-200); display: flex; align-items: center; justify-content: center; font-size: 8rem; color: var(--color-gray-400); border-radius: var(--radius-lg);">
+                {% if producto.imagen %}
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}"
+                    style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-lg);">
+                {% else %}
+                📦
+                {% endif %}
+            </div>
+
+            <div class="product-detail-info" style="padding: 2rem;">
+                <span class="product-sku" style="display: block; margin-bottom: 0.5rem;">SKU: {{ producto.sku }}</span>
+                <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--color-dark); margin-bottom: 1rem;">{{
+                    producto.nombre }}</h1>
+
+                {% if producto.descripcion %}
+                <p style="color: var(--color-gray-600); margin-bottom: 1.5rem;">{{ producto.descripcion }}</p>
+                {% endif %}
+
+                <div style="margin-bottom: 1.5rem;">
+                    <span style="font-size: 2rem; font-weight: 700; color: var(--color-primary);">
+                        {% if descuento_cliente > 0 %}
+                        ${{ producto.precio_con_descuento|floatformat:2 }}
+                        {% else %}
+                        ${{ producto.precio }}
+                        {% endif %}
+                    </span>
+                    {% if descuento_cliente > 0 %}
+                    <span style="text-decoration: line-through; color: var(--color-gray-500); margin-left: 0.5rem;">${{
+                        producto.precio }}</span>
+                    <span class="product-discount-badge">-{{ descuento_cliente }}%</span>
+                    {% endif %}
+                </div>
+
+                <div class="product-stock {% if producto.stock > 10 %}stock-available{% elif producto.stock > 0 %}stock-low{% else %}stock-out{% endif %}"
+                    style="font-size: 1rem; margin-bottom: 1.5rem;">
+                    {% if producto.stock > 10 %}
+                    ✓ En stock ({{ producto.stock }} unidades)
+                    {% elif producto.stock > 0 %}
+                    ⚠ Pocas unidades ({{ producto.stock }})
+                    {% else %}
+                    ✗ Sin stock
+                    {% endif %}
+                </div>
+
+                {% if producto.stock > 0 %}
+                <form action="{% url 'cart:agregar' producto.id %}" method="post"
+                    style="display: flex; gap: 1rem; align-items: center;">
+                    {% csrf_token %}
+                    <input type="number" name="cantidad" value="1" min="1" max="{{ producto.stock }}"
+                        class="quantity-input">
+                    <button type="submit" class="btn btn-primary btn-lg">🛒 Agregar al Carrito</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

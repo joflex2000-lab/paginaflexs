@@ -1,0 +1,31 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block title %}Eliminar Cliente{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+    <h1 class="panel-title">Eliminar Cliente</h1>
+</div>
+
+<div class="panel-form" style="max-width: 500px;">
+    <div
+        style="background: #fff3cd; border: 1px solid #ffc107; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+        <h3 style="color: #856404; margin: 0 0 0.5rem 0; font-size: 1rem;">⚠️ Advertencia</h3>
+        <p style="margin: 0; color: #856404;">
+            ¿Estás seguro de que querés eliminar el cliente <strong>{{ object.nombre }}</strong>?
+        </p>
+        <p style="margin: 0.5rem 0 0 0; color: #856404; font-size: 0.875rem;">
+            Esta acción también eliminará la cuenta de usuario asociada (<strong>{{ object.usuario.username }}</strong>)
+            y NO se puede deshacer.
+        </p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-actions">
+            <button type="submit" class="btn btn-danger">Sí, Eliminar</button>
+            <a href="{% url 'panel:clientes' %}" class="btn btn-outline">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

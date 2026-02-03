@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mi Perfil - FLEXS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar">👤</div>
+                <div class="profile-name">{{ user.username }}</div>
+                <div class="profile-role">{{ user.get_rol_display }}</div>
+            </div>
+
+            <div class="profile-body">
+                <div class="profile-section">
+                    <h3>Información de Cuenta</h3>
+                    <div class="profile-info">
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">Email</div>
+                            <div class="profile-info-value">{{ user.email|default:"No especificado" }}</div>
+                        </div>
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">Usuario</div>
+                            <div class="profile-info-value">{{ user.username }}</div>
+                        </div>
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">Miembro desde</div>
+                            <div class="profile-info-value">{{ user.date_joined|date:"d/m/Y" }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if cliente %}
+                <div class="profile-section">
+                    <h3>Datos Comerciales</h3>
+                    <div class="profile-info">
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">Nombre / Razón Social</div>
+                            <div class="profile-info-value">{{ cliente.nombre }}</div>
+                        </div>
+                        {% if cliente.cuit_dni %}
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">CUIT/DNI</div>
+                            <div class="profile-info-value">{{ cliente.cuit_dni }}</div>
+                        </div>
+                        {% endif %}
+                        {% if cliente.condicion_iva %}
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">Condición IVA</div>
+                            <div class="profile-info-value">{{ cliente.get_condicion_iva_display }}</div>
+                        </div>
+                        {% endif %}
+                        {% if cliente.descuento > 0 %}
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">Tu Descuento</div>
+                            <div class="profile-info-value" style="color: var(--color-success); font-weight: 700;">{{
+                                cliente.descuento }}%</div>
+                        </div>
+                        {% endif %}
+                        {% if cliente.telefonos %}
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">Teléfonos</div>
+                            <div class="profile-info-value">{{ cliente.telefonos }}</div>
+                        </div>
+                        {% endif %}
+                        {% if cliente.domicilio %}
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">Domicilio</div>
+                            <div class="profile-info-value">{{ cliente.domicilio }}</div>
+                        </div>
+                        {% endif %}
+                        {% if cliente.provincia %}
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">Provincia</div>
+                            <div class="profile-info-value">{{ cliente.provincia }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="profile-actions">
+                    {% if user.es_admin %}
+                    <a href="{% url 'panel:dashboard' %}" class="btn btn-primary">Ir al Panel Admin</a>
+                    {% endif %}
+                    <a href="{% url 'catalog:lista' %}" class="btn btn-outline">Ver Catálogo</a>
+                    <a href="{% url 'orders:lista' %}" class="btn btn-outline">Mis Pedidos</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

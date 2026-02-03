@@ -1,0 +1,84 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block title %}Clientes{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+    <h1 class="panel-title">Clientes</h1>
+    <div style="display: flex; gap: 0.5rem;">
+        <form method="post" action="{% url 'panel:eliminar_todos_clientes' %}"
+            onsubmit="return confirm('¿Estás SEGURO de que querés eliminar TODOS los clientes? Esta acción NO se puede deshacer.');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">🗑️ Eliminar Todos</button>
+        </form>
+        <a href="{% url 'panel:cliente_crear' %}" class="btn btn-primary">+ Nuevo Cliente</a>
+    </div>
+</div>
+
+<div class="filter-bar">
+    <form method="get" style="display: flex; gap: 1rem; width: 100%;">
+        <input type="text" name="q" class="form-control" placeholder="Buscar por nombre, CUIT o usuario..."
+            value="{{ request.GET.q }}">
+        <button type="submit" class="btn btn-primary">Buscar</button>
+        {% if request.GET.q %}
+        <a href="{% url 'panel:clientes' %}" class="btn btn-outline">Limpiar</a>
+        {% endif %}
+    </form>
+</div>
+
+<div class="panel-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Usuario</th>
+                <th>CUIT/DNI</th>
+                <th>Provincia</th>
+                <th>Descuento</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+            <tr>
+                <td><strong>{{ cliente.nombre }}</strong></td>
+                <td>{{ cliente.usuario.username }}</td>
+                <td>{{ cliente.cuit_dni|default:"-" }}</td>
+                <td>{{ cliente.provincia|default:"-" }}</td>
+                <td>
+                    {% if cliente.descuento > 0 %}
+                    <span style="color: var(--color-success); font-weight: 600;">{{ cliente.descuento }}%</span>
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td class="actions-cell">
+                    <a href="{% url 'panel:cliente_editar' cliente.id %}" class="btn-icon btn-icon-edit"
+                        title="Editar">✏️</a>
+                    <a href="{% url 'panel:cliente_eliminar' cliente.id %}" class="btn-icon btn-icon-delete"
+                        title="Eliminar">🗑️</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; color: var(--color-gray-500); padding: 2rem;">
+                    No se encontraron clientes
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if page_obj.has_other_pages %}
+<div class="pagination" style="margin-top: 1rem;">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}">‹</a>
+    {% endif %}
+    <span class="current">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}">›</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

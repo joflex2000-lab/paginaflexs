@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Carrito - FLEXS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/cart.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="cart-page">
+    <div class="cart-container">
+        <h1 class="cart-title">🛒 Mi Carrito</h1>
+
+        {% if carrito|length > 0 %}
+        <div class="cart-items">
+            {% for item in carrito %}
+            <div class="cart-item">
+                <div class="cart-item-image">
+                    {% if item.producto.imagen %}
+                    <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}">
+                    {% else %}
+                    📦
+                    {% endif %}
+                </div>
+
+                <div class="cart-item-info">
+                    <span class="cart-item-sku">{{ item.producto.sku }}</span>
+                    <h3 class="cart-item-name">{{ item.producto.nombre }}</h3>
+                    <span class="cart-item-price">${{ item.precio_con_descuento }} c/u</span>
+                </div>
+
+                <div class="cart-item-quantity">
+                    <form action="{% url 'cart:actualizar' item.producto.id %}" method="post">
+                        {% csrf_token %}
+                        <input type="number" name="cantidad" value="{{ item.cantidad }}" min="1"
+                            max="{{ item.producto.stock }}" onchange="this.form.submit()">
+                    </form>
+                </div>
+
+                <div class="cart-item-subtotal">
+                    ${{ item.subtotal|floatformat:2 }}
+                </div>
+
+                <a href="{% url 'cart:quitar' item.producto.id %}" class="cart-item-remove" title="Quitar">🗑️</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="cart-summary">
+            {% if carrito.descuento > 0 %}
+            <div class="cart-summary-row">
+                <span class="cart-summary-label">Subtotal (sin descuento)</span>
+                <span class="cart-summary-value">${{ carrito.get_total_sin_descuento|floatformat:2 }}</span>
+            </div>
+            <div class="cart-summary-row">
+                <span class="cart-summary-label cart-discount">Tu descuento ({{ carrito.descuento }}%)</span>
+                <span class="cart-summary-value cart-discount">
+                    -${{ carrito.get_total_sin_descuento|floatformat:2|add:"-"|add:carrito.get_total|floatformat:2 }}
+                </span>
+            </div>
+            {% endif %}
+
+            <div class="cart-summary-row total">
+                <span class="cart-summary-label">Total</span>
+                <span class="cart-summary-value">${{ carrito.get_total|floatformat:2 }}</span>
+            </div>
+
+            <form action="{% url 'orders:crear' %}" method="post">
+                {% csrf_token %}
+                <div class="cart-note">
+                    <label for="nota">Nota para el pedido (opcional)</label>
+                    <textarea name="nota" id="nota"
+                        placeholder="Instrucciones especiales, horarios de entrega, etc."></textarea>
+                </div>
+
+                <div class="cart-actions">
+                    <button type="submit" class="btn btn-primary btn-lg">Confirmar Pedido</button>
+                    <a href="{% url 'catalog:lista' %}" class="btn btn-outline">Seguir Comprando</a>
+                    <a href="{% url 'cart:limpiar' %}" class="btn btn-text"
+                        onclick="return confirm('¿Vaciar el carrito?');">Vaciar Carrito</a>
+                </div>
+            </form>
+        </div>
+
+        {% else %}
+        <div class="cart-empty">
+            <div class="cart-empty-icon">🛒</div>
+            <h3>Tu carrito está vacío</h3>
+            <p>Agrega productos desde el catálogo para comenzar tu pedido.</p>
+            <a href="{% url 'catalog:lista' %}" class="btn btn-primary btn-lg">Ver Catálogo</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

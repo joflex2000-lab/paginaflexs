@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - FLEXS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+</head>
+
+<body>
+    <div class="auth-page">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <div class="auth-logo">FLEXS</div>
+                    <div class="auth-title">Iniciar Sesión</div>
+                </div>
+
+                <div class="auth-body">
+                    {% if form.errors %}
+                    <div class="auth-errors">
+                        <ul>
+                            {% for field in form %}
+                            {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" class="auth-form">
+                        {% csrf_token %}
+
+                        <div class="form-group">
+                            <label for="id_username">Usuario</label>
+                            {{ form.username }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_password">Contraseña</label>
+                            {{ form.password }}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Ingresar</button>
+                    </form>
+                </div>
+
+                <div class="auth-footer">
+                    <p>¿No tenés cuenta? <a href="{% url 'accounts:registro' %}">Registrate aquí</a></p>
+                    <p style="margin-top: 8px;"><a href="{% url 'core:home' %}">← Volver al inicio</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

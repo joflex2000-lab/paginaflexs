@@ -1,0 +1,56 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block title %}Categorías{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+    <h1 class="panel-title">Categorías</h1>
+    <a href="{% url 'panel:categoria_crear' %}" class="btn btn-primary">+ Nueva Categoría</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if categorias %}
+        <ul style="list-style: none;">
+            {% for categoria in categorias %}
+            <li
+                style="padding: 0.75rem; border-bottom: 1px solid var(--color-gray-200); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>{{ categoria.nombre }}</strong>
+                    {% if not categoria.activa %}
+                    <span style="color: var(--color-gray-500); font-size: 0.875rem;">(inactiva)</span>
+                    {% endif %}
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <a href="{% url 'panel:categoria_productos' categoria.id %}" class="btn btn-sm btn-outline-info"
+                        title="Gestionar Productos">Productos</a>
+                    <a href="{% url 'panel:categoria_editar' categoria.id %}" class="btn btn-sm btn-outline">Editar</a>
+                </div>
+            </li>
+
+            {% for sub in categoria.subcategorias.all %}
+            <li
+                style="padding: 0.75rem 0.75rem 0.75rem 2rem; border-bottom: 1px solid var(--color-gray-100); display: flex; justify-content: space-between; align-items: center; background: var(--color-gray-50);">
+                <div>
+                    └ {{ sub.nombre }}
+                    {% if not sub.activa %}
+                    <span style="color: var(--color-gray-500); font-size: 0.875rem;">(inactiva)</span>
+                    {% endif %}
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <a href="{% url 'panel:categoria_productos' sub.id %}" class="btn btn-sm btn-outline-info"
+                        title="Gestionar Productos">Productos</a>
+                    <a href="{% url 'panel:categoria_editar' sub.id %}" class="btn btn-sm btn-outline">Editar</a>
+                </div>
+            </li>
+            {% endfor %}
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p style="text-align: center; color: var(--color-gray-500); padding: 2rem;">
+            No hay categorías. <a href="{% url 'panel:categoria_crear' %}">Crear una</a>
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FLEXS - Repuestos de elásticos para camiones y acoplados en Argentina">
+    <title>{% block title %}FLEXS{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-content">
+            <a href="{% url 'core:home' %}" class="logo">
+                <span class="logo-text">FLEXS</span>
+            </a>
+
+            <nav class="nav-main">
+                <ul class="nav-list">
+                    <li><a href="{% url 'core:home' %}#nosotros">Nosotros</a></li>
+                    <li><a href="{% url 'core:home' %}#servicios">Servicios</a></li>
+                    <li><a href="{% url 'core:home' %}#productos">Productos</a></li>
+                    <li><a href="{% url 'core:home' %}#contacto">Contacto</a></li>
+                </ul>
+            </nav>
+
+            <div class="header-actions">
+                {% if user.is_authenticated %}
+                {% if user.es_admin %}
+                <a href="{% url 'panel:dashboard' %}" class="btn btn-outline">Panel Admin</a>
+                {% endif %}
+                <a href="{% url 'catalog:lista' %}" class="btn btn-primary">Catálogo</a>
+                <a href="{% url 'cart:ver' %}" class="btn-cart">
+                    🛒 <span class="cart-count">{{ carrito|length }}</span>
+                </a>
+                <form action="{% url 'accounts:logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-text">Salir</button>
+                </form>
+                {% else %}
+                <a href="{% url 'accounts:login' %}" class="btn btn-outline">Iniciar Sesión</a>
+                <a href="{% url 'accounts:registro' %}" class="btn btn-primary">Crear Cuenta</a>
+                {% endif %}
+            </div>
+
+            <button class="mobile-menu-btn" aria-label="Menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="message message-{{ message.tags }}">
+            {{ message }}
+            <button class="message-close">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <span class="logo-text">FLEXS</span>
+                    <p>Expertos en repuestos para la industria del transporte.</p>
+                </div>
+
+                <div class="footer-contact">
+                    <h4>Contacto</h4>
+                    <p>📍 Indalecio Gomez 4215, Villa Lynch, San Martín, Buenos Aires</p>
+                    <p>📞 +54 011 5177-9690</p>
+                    <p>📞 +54 011 4755-2404</p>
+                    <p>✉️ ventas@flexs.com.ar</p>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Enlaces</h4>
+                    <ul>
+                        <li><a href="{% url 'core:home' %}#nosotros">Nosotros</a></li>
+                        <li><a href="{% url 'core:home' %}#productos">Productos</a></li>
+                        <li><a href="{% url 'core:home' %}#contacto">Contacto</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2024 FLEXS. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

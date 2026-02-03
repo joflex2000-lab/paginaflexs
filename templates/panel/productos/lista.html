@@ -1,0 +1,89 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block title %}Productos{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+    <h1 class="panel-title">Productos</h1>
+    <div style="display: flex; gap: 0.5rem;">
+        <form method="post" action="{% url 'panel:eliminar_todos_productos' %}"
+            onsubmit="return confirm('¿Estás SEGURO de que querés eliminar TODOS los productos? Esta acción NO se puede deshacer.');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">🗑️ Eliminar Todos</button>
+        </form>
+        <a href="{% url 'panel:producto_crear' %}" class="btn btn-primary">+ Nuevo Producto</a>
+    </div>
+</div>
+
+<div class="filter-bar">
+    <form method="get" style="display: flex; gap: 1rem; width: 100%;">
+        <input type="text" name="q" class="form-control" placeholder="Buscar por nombre o SKU..."
+            value="{{ busqueda }}">
+        <button type="submit" class="btn btn-primary">Buscar</button>
+        {% if busqueda %}
+        <a href="{% url 'panel:productos' %}" class="btn btn-outline">Limpiar</a>
+        {% endif %}
+    </form>
+</div>
+
+<div class="panel-table">
+    <table>
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for producto in productos %}
+            <tr>
+                <td><strong>{{ producto.sku }}</strong></td>
+                <td>{{ producto.nombre|truncatechars:50 }}</td>
+                <td>${{ producto.precio|floatformat:2 }}</td>
+                <td>
+                    <span
+                        class="{% if producto.stock > 10 %}stock-available{% elif producto.stock > 0 %}stock-low{% else %}stock-out{% endif %}">
+                        {{ producto.stock }}
+                    </span>
+                </td>
+                <td>
+                    {% if producto.activo %}
+                    <span style="color: var(--color-success);">✓ Activo</span>
+                    {% else %}
+                    <span style="color: var(--color-gray-500);">Inactivo</span>
+                    {% endif %}
+                </td>
+                <td class="actions-cell">
+                    <a href="{% url 'panel:producto_editar' producto.id %}" class="btn-icon btn-icon-edit"
+                        title="Editar">✏️</a>
+                    <a href="{% url 'panel:producto_eliminar' producto.id %}" class="btn-icon btn-icon-delete"
+                        title="Eliminar">🗑️</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; color: var(--color-gray-500); padding: 2rem;">
+                    No se encontraron productos
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if page_obj.has_other_pages %}
+<div class="pagination" style="margin-top: 1rem;">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}{% if busqueda %}&q={{ busqueda }}{% endif %}">‹</a>
+    {% endif %}
+    <span class="current">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}{% if busqueda %}&q={{ busqueda }}{% endif %}">›</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

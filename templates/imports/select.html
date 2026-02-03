@@ -1,0 +1,68 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block title %}Importar Datos{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+    <h1 class="panel-title">Importar Datos</h1>
+</div>
+
+<div class="import-cards">
+    {% for key, info in importadores.items %}
+    <a href="{% url 'imports:upload' key %}" class="import-card">
+        <span class="import-card-icon">{{ info.icono }}</span>
+        <h3 class="import-card-title">{{ info.nombre }}</h3>
+        <p class="import-card-desc">{{ info.descripcion }}</p>
+    </a>
+    {% endfor %}
+</div>
+
+<div style="margin-top: 2rem;">
+    <a href="{% url 'imports:logs' %}" class="btn btn-outline">📋 Ver historial de importaciones</a>
+</div>
+
+<style>
+    .import-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .import-card {
+        background: var(--color-gray-50);
+        border: 2px solid var(--color-gray-200);
+        border-radius: 12px;
+        padding: 2rem;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.2s;
+    }
+
+    .import-card:hover {
+        border-color: var(--color-primary);
+        background: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .import-card-icon {
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 1rem;
+    }
+
+    .import-card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--color-gray-900);
+    }
+
+    .import-card-desc {
+        font-size: 0.875rem;
+        color: var(--color-gray-600);
+        line-height: 1.5;
+    }
+</style>
+{% endblock %}

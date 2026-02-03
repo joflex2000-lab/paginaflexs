@@ -1,0 +1,124 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block title %}Historial de Importaciones{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+    <a href="{% url 'imports:select' %}" class="btn btn-outline btn-sm">← Volver</a>
+    <h1 class="panel-title">📋 Historial de Importaciones</h1>
+</div>
+
+<div class="panel-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Archivo</th>
+                <th>Usuario</th>
+                <th>Creados</th>
+                <th>Actualizados</th>
+                <th>Errores</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.created_at|date:"d/m/Y H:i" }}</td>
+                <td>{{ log.get_tipo_display }}</td>
+                <td>{{ log.archivo_nombre|truncatechars:30 }}</td>
+                <td>{{ log.usuario.username|default:"-" }}</td>
+                <td><span class="badge badge-success">{{ log.creados }}</span></td>
+                <td><span class="badge badge-primary">{{ log.actualizados }}</span></td>
+                <td>
+                    {% if log.errores > 0 %}
+                    <span class="badge badge-danger">{{ log.errores }}</span>
+                    {% else %}
+                    <span class="badge badge-secondary">0</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="status-badge status-{{ log.estado }}">{{ log.get_estado_display }}</span>
+                </td>
+                <td>
+                    {% if log.errores > 0 %}
+                    <a href="{% url 'imports:download_errors' log.id %}" class="btn btn-outline btn-sm">
+                        📥 Errores
+                    </a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" style="text-align: center; color: var(--color-gray-500); padding: 2rem;">
+                    No hay importaciones registradas
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if page_obj.has_other_pages %}
+<div class="pagination" style="margin-top: 1rem;">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}">‹ Anterior</a>
+    {% endif %}
+    <span class="current">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}">Siguiente ›</a>
+    {% endif %}
+</div>
+{% endif %}
+
+<style>
+    .badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .badge-success {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .badge-primary {
+        background: #cce5ff;
+        color: #004085;
+    }
+
+    .badge-danger {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .badge-secondary {
+        background: #e9ecef;
+        color: #6c757d;
+    }
+
+    .status-pendiente {
+        background: #ffc107;
+        color: #000;
+    }
+
+    .status-procesando {
+        background: #17a2b8;
+        color: #fff;
+    }
+
+    .status-completado {
+        background: #28a745;
+        color: #fff;
+    }
+
+    .status-error {
+        background: #dc3545;
+        color: #fff;
+    }
+</style>
+{% endblock %}

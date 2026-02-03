@@ -1,0 +1,23 @@
+# Django Framework
+Django>=5.0,<6.0
+
+# PostgreSQL
+psycopg2-binary>=2.9.9
+
+# Variables de entorno
+python-dotenv>=1.0.0
+
+# Imágenes
+Pillow>=10.0.0
+
+# Excel
+openpyxl>=3.1.2
+
+# Archivos estáticos en producción
+whitenoise>=6.6.0
+
+# Para parsear DATABASE_URL
+dj-database-url>=2.1.0
+
+# Servidor de producción
+gunicorn>=21.2.0

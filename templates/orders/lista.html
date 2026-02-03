@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mis Pedidos - FLEXS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/cart.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="orders-page">
+    <div class="orders-container">
+        <h1 class="cart-title">📋 Mis Pedidos</h1>
+
+        {% if pedidos %}
+        <div class="orders-list">
+            {% for pedido in pedidos %}
+            <a href="{% url 'orders:detalle' pedido.id %}" class="order-card">
+                <div class="order-info">
+                    <h3>Pedido #{{ pedido.id }}</h3>
+                    <div class="order-meta">
+                        <span>📅 {{ pedido.created_at|date:"d/m/Y H:i" }}</span>
+                        <span>📦 {{ pedido.cantidad_items }} productos</span>
+                        <span class="status-badge status-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span>
+                    </div>
+                </div>
+                <div class="order-total">
+                    ${{ pedido.total|floatformat:2 }}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">‹</a>
+            {% endif %}
+
+            <span class="current">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">›</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="cart-empty">
+            <div class="cart-empty-icon">📋</div>
+            <h3>No tenés pedidos aún</h3>
+            <p>Cuando realices tu primer pedido, aparecerá aquí.</p>
+            <a href="{% url 'catalog:lista' %}" class="btn btn-primary btn-lg">Ir al Catálogo</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
