@@ -56,27 +56,36 @@ class BaseImporter(ABC):
             raise ValueError(f"Formato no soportado: {extension}. Use .xlsx o .csv")
     
     def _leer_excel(self):
-        """Lee archivo Excel usando openpyxl."""
+        """Lee archivo Excel usando openpyxl de forma eficiente en memoria."""
         if hasattr(self.archivo, 'read'):
-            wb = openpyxl.load_workbook(self.archivo, data_only=True)
+            wb = openpyxl.load_workbook(self.archivo, data_only=True, read_only=True)
         else:
-            wb = openpyxl.load_workbook(self.archivo, data_only=True)
+            wb = openpyxl.load_workbook(self.archivo, data_only=True, read_only=True)
         
         ws = wb.active
-        rows = list(ws.iter_rows(values_only=True))
         
-        if not rows:
+        # Obtener headers de la primera fila
+        rows_iter = ws.iter_rows(values_only=True)
+        headers = None
+        try:
+            first_row = next(rows_iter)
+            headers = [str(h).strip() if h else '' for h in first_row]
+        except StopIteration:
+            wb.close()
             return []
         
-        # Primera fila son los headers
-        headers = [str(h).strip() if h else '' for h in rows[0]]
-        
+        # Procesar filas en chunks para liberar memoria
         datos = []
-        for i, row in enumerate(rows[1:], start=2):
+        fila_num = 2  # Empezamos en 2 (primera fila es header)
+        
+        for row in rows_iter:
+            # Saltar filas vacías
             if all(cell is None or str(cell).strip() == '' for cell in row):
-                continue  # Saltar filas vacías
+                fila_num += 1
+                continue
             
-            fila_dict = {'_fila': i}
+            # Construir diccionario de la fila
+            fila_dict = {'_fila': fila_num}
             for j, header in enumerate(headers):
                 if header and j < len(row):
                     valor = row[j]
@@ -84,8 +93,11 @@ class BaseImporter(ABC):
                         fila_dict[header] = str(valor).strip() if not isinstance(valor, (int, float)) else valor
                     else:
                         fila_dict[header] = ''
+            
             datos.append(fila_dict)
+            fila_num += 1
         
+        wb.close()
         return datos
     
     def _leer_csv(self):
@@ -130,6 +142,8 @@ class BaseImporter(ABC):
         Returns:
             dict con: filas (primeras 10), a_crear, a_actualizar, errores, total
         """
+        import gc  # Para forzar garbage collection
+        
         self.datos = self.leer_archivo()
         self.validar_columnas(self.datos)
         
@@ -141,18 +155,27 @@ class BaseImporter(ABC):
             'total': len(self.datos)
         }
         
-        for fila in self.datos:
-            try:
-                accion, obj = self.procesar_fila(fila, dry_run=True)
-                if accion == 'crear':
-                    self.preview_data['a_crear'] += 1
-                elif accion == 'actualizar':
-                    self.preview_data['a_actualizar'] += 1
-            except Exception as e:
-                self.preview_data['errores'].append({
-                    'fila': fila.get('_fila', '?'),
-                    'mensaje': str(e)
-                })
+        # Procesar en chunks para liberar memoria
+        chunk_size = 500
+        for i in range(0, len(self.datos), chunk_size):
+            chunk = self.datos[i:i+chunk_size]
+            
+            for fila in chunk:
+                try:
+                    accion, obj = self.procesar_fila(fila, dry_run=True)
+                    if accion == 'crear':
+                        self.preview_data['a_crear'] += 1
+                    elif accion == 'actualizar':
+                        self.preview_data['a_actualizar'] += 1
+                except Exception as e:
+                    self.preview_data['errores'].append({
+                        'fila': fila.get('_fila', '?'),
+                        'mensaje': str(e)
+                    })
+            
+            # Liberar memoria después de cada chunk
+            del chunk
+            gc.collect()
         
         return self.preview_data
     
@@ -163,6 +186,8 @@ class BaseImporter(ABC):
         Returns:
             ImportLog con el resultado
         """
+        import gc  # Para forzar garbage collection
+        
         # Crear log
         self.log = ImportLog.objects.create(
             tipo=self.TIPO,
@@ -177,25 +202,34 @@ class BaseImporter(ABC):
             actualizados = 0
             errores = 0
             
-            for i, fila in enumerate(self.datos):
-                try:
-                    accion, obj = self.procesar_fila(fila, dry_run=False)
-                    if accion == 'crear':
-                        creados += 1
-                    elif accion == 'actualizar':
-                        actualizados += 1
-                except Exception as e:
-                    errores += 1
-                    ImportError.objects.create(
-                        log=self.log,
-                        fila=fila.get('_fila', i+2),
-                        mensaje=str(e)
-                    )
+            # Procesar en chunks para mejor rendimiento
+            chunk_size = 100
+            for chunk_start in range(0, len(self.datos), chunk_size):
+                chunk_end = min(chunk_start + chunk_size, len(self.datos))
+                chunk = self.datos[chunk_start:chunk_end]
                 
-                # Actualizar progreso cada 5 filas para feedback más fluido
-                if (i + 1) % 5 == 0:
-                    self.log.procesados = i + 1
-                    self.log.save(update_fields=['procesados'])
+                for i, fila in enumerate(chunk):
+                    try:
+                        accion, obj = self.procesar_fila(fila, dry_run=False)
+                        if accion == 'crear':
+                            creados += 1
+                        elif accion == 'actualizar':
+                            actualizados += 1
+                    except Exception as e:
+                        errores += 1
+                        ImportError.objects.create(
+                            log=self.log,
+                            fila=fila.get('_fila', chunk_start + i + 2),
+                            mensaje=str(e)
+                        )
+                
+                # Actualizar progreso al final de cada chunk
+                self.log.procesados = chunk_end
+                self.log.save(update_fields=['procesados'])
+                
+                # Liberar memoria después de cada chunk
+                del chunk
+                gc.collect()
             
             # Finalizar
             self.log.creados = creados
