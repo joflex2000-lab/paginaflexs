@@ -18,35 +18,49 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        from apps.orders.models import Pedido
+        
         confirm = options['confirm']
 
         # Count items
         client_count = Cliente.objects.count()
         product_count = Producto.objects.count()
+        order_count = Pedido.objects.count()
 
-        if client_count == 0 and product_count == 0:
+        if client_count == 0 and product_count == 0 and order_count == 0:
             self.stdout.write(
                 self.style.SUCCESS('Database is already empty - nothing to clear')
             )
             return
 
-        self.stdout.write(f'Found {client_count} clients and {product_count} products')
+        self.stdout.write(
+            f'Found {order_count} orders, {client_count} clients and {product_count} products'
+        )
 
         # Delete all
-        if confirm or client_count + product_count < 100:  # Auto-confirm if few items
+        if confirm or (client_count + product_count + order_count) < 100:  # Auto-confirm if few items
             self.stdout.write('Clearing database...')
             
+            # Delete orders first (they reference clients)
+            if order_count > 0:
+                deleted_orders = Pedido.objects.all().delete()
+                self.stdout.write(
+                    self.style.SUCCESS(f'Deleted {deleted_orders[0]} orders')
+                )
+            
             # Delete clients (this also deletes associated users)
-            deleted_clients = Cliente.objects.all().delete()
-            self.stdout.write(
-                self.style.SUCCESS(f'Deleted {deleted_clients[0]} clients')
-            )
+            if client_count > 0:
+                deleted_clients = Cliente.objects.all().delete()
+                self.stdout.write(
+                    self.style.SUCCESS(f'Deleted {deleted_clients[0]} clients')
+                )
             
             # Delete products
-            deleted_products = Producto.objects.all().delete()
-            self.stdout.write(
-                self.style.SUCCESS(f'Deleted {deleted_products[0]} products')
-            )
+            if product_count > 0:
+                deleted_products = Producto.objects.all().delete()
+                self.stdout.write(
+                    self.style.SUCCESS(f'Deleted {deleted_products[0]} products')
+                )
             
             self.stdout.write(
                 self.style.SUCCESS('Database cleared successfully!')
