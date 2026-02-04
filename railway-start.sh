@@ -24,5 +24,22 @@ else:
     print(f'Superuser {username} already exists')
 EOF
 
+echo "Importing initial data..."
+# Import clients if file exists and database is empty
+if [ -f "data/clientes.xlsx" ]; then
+    echo "Importing clients from data/clientes.xlsx..."
+    python manage.py import_clientes data/clientes.xlsx --skip-if-exists
+else
+    echo "No client data file found (data/clientes.xlsx)"
+fi
+
+# Import products if file exists and database is empty
+if [ -f "data/productos.xlsx" ]; then
+    echo "Importing products from data/productos.xlsx..."
+    python manage.py import_productos data/productos.xlsx --skip-if-exists
+else
+    echo "No product data file found (data/productos.xlsx)"
+fi
+
 echo "Starting Gunicorn..."
 gunicorn paginaflexs.wsgi:application
