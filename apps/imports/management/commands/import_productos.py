@@ -52,26 +52,17 @@ class Command(BaseCommand):
                 # Create importer
                 importer = ProductImporter(f)
 
-                # Create import log
-                log = ImportLog.objects.create(
-                    tipo='productos',
-                    archivo=os.path.basename(file_path),
-                    estado='procesando',
-                    total_filas=0
-                )
-                importer.log = log
-
                 # Preview (analyze)
                 self.stdout.write('Analyzing file...')
                 preview_result = importer.preview()
                 
                 self.stdout.write(
                     self.style.SUCCESS(
-                        f'Analysis complete: {preview_result["total_filas"]} rows found'
+                        f'Analysis complete: {preview_result["total"]} rows found'
                     )
                 )
-                self.stdout.write(f'  - To create: {preview_result["resumen"]["crear"]}')
-                self.stdout.write(f'  - To update: {preview_result["resumen"]["actualizar"]}')
+                self.stdout.write(f'  - To create: {preview_result["a_crear"]}')
+                self.stdout.write(f'  - To update: {preview_result["a_actualizar"]}')
                 
                 if preview_result['errores']:
                     self.stdout.write(
@@ -93,8 +84,8 @@ class Command(BaseCommand):
                     )
                 )
                 self.stdout.write(f'  - Processed: {result["procesados"]}')
-                self.stdout.write(f'  - Created: {result["resumen"]["crear"]}')
-                self.stdout.write(f'  - Updated: {result["resumen"]["actualizar"]}')
+                self.stdout.write(f'  - Created: {result["a_crear"]}')
+                self.stdout.write(f'  - Updated: {result["a_actualizar"]}')
                 
                 if result['errores']:
                     self.stdout.write(
