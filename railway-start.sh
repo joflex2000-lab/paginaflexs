@@ -41,5 +41,13 @@ else
     echo "No product data file found (data/productos.xlsx)"
 fi
 
+# Import clamps/abrazaderas if file exists
+if [ -f "data/abrazaderas.xlsx" ]; then
+    echo "Importing clamps from data/abrazaderas.xlsx..."
+    python manage.py import_productos data/abrazaderas.xlsx --skip-if-exists
+else
+    echo "No clamps data file found (data/abrazaderas.xlsx)"
+fi
+
 echo "Starting Gunicorn..."
 gunicorn paginaflexs.wsgi:application
