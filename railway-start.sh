@@ -24,19 +24,22 @@ else:
     print(f'Superuser {username} already exists')
 EOF
 
+echo "Clearing existing data before import..."
+python manage.py clear_data --confirm
+
 echo "Importing initial data..."
-# Import clients if file exists and database is empty
+# Import clients if file exists
 if [ -f "data/clientes.xlsx" ]; then
     echo "Importing clients from data/clientes.xlsx..."
-    python manage.py import_clientes data/clientes.xlsx --skip-if-exists
+    python manage.py import_clientes data/clientes.xlsx
 else
     echo "No client data file found (data/clientes.xlsx)"
 fi
 
-# Import products if file exists and database is empty
+# Import products if file exists
 if [ -f "data/productos.xlsx" ]; then
     echo "Importing products from data/productos.xlsx..."
-    python manage.py import_productos data/productos.xlsx --skip-if-exists
+    python manage.py import_productos data/productos.xlsx
 else
     echo "No product data file found (data/productos.xlsx)"
 fi
@@ -44,7 +47,7 @@ fi
 # Import clamps/abrazaderas if file exists
 if [ -f "data/abrazaderas.xlsx" ]; then
     echo "Importing clamps from data/abrazaderas.xlsx..."
-    python manage.py import_productos data/abrazaderas.xlsx --skip-if-exists
+    python manage.py import_productos data/abrazaderas.xlsx
 else
     echo "No clamps data file found (data/abrazaderas.xlsx)"
 fi
